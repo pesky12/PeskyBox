@@ -12,7 +12,7 @@
     },
     "bannerUrl":"banner.png",
     "githubRepos":[
-        "source:pesky12/Seat-Collision-Manager,
+        "source:pesky12/Seat-Collision-Manager",
         "source:pesky12/Easy-Quality-Switch"
     ],
     "packages":[
