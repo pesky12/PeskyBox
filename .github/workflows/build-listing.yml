@@ -1,0 +1,75 @@
+name: Build VPM Listing
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'source.json'
+      - '.github/workflows/**'
+  workflow_dispatch:
+  schedule:
+    - cron: '0 */6 * * *'  # Every 6 hours
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+env:
+  listPublishDirectory: site/public
+  pathToCi: ci
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Checkout CI runner
+        uses: actions/checkout@v4
+        with:
+          repository: PiMaker/package-list-action
+          path: ${{ env.pathToCi }}
+          clean: false
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '6.0.x'
+
+      - name: Build VPM Listing
+        run: chmod +x ${{ env.pathToCi }}/build.sh && ${{ env.pathToCi }}/build.sh BuildMultiPackageListing --root ${{ env.pathToCi }} --list-publish-directory $GITHUB_WORKSPACE/${{ env.listPublishDirectory }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Sync listing to Astro data
+        run: |
+          mkdir -p site/src/data
+          cp site/public/index.json site/src/data/listing.json
+
+      - name: Build Astro Site
+        run: |
+          cd site
+          npm ci
+          npm run build
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site/dist
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

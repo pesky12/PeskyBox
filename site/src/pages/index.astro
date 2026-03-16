@@ -1,0 +1,64 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Hero from "../components/Hero.tsx";
+import SearchBar from "../components/SearchBar.astro";
+import PackageGrid from "../components/PackageGrid.tsx";
+import DarkVeil from "../components/DarkVeil.jsx";
+import { processListing } from "../lib/packages";
+import source from "../../../source.json";
+import listing from "../data/listing.json";
+
+const packages = processListing(
+  (listing as { packages: Parameters<typeof processListing>[0] }).packages ?? {}
+);
+
+const socialLinks = [
+  { label: "GitHub", href: source.socials?.github },
+  { label: "Website", href: source.socials?.website },
+  { label: "Twitter", href: source.socials?.twitter },
+].filter((item) => typeof item.href === "string" && item.href.trim().length > 0);
+---
+
+<Layout title={source.name} description={source.description}>
+  <div class="fixed inset-0 -z-10 overflow-hidden">
+    <DarkVeil
+      client:load
+      hueShift={320}
+      noiseIntensity={0}
+      scanlineIntensity={0.28}
+      speed={0.7}
+      scanlineFrequency={2.7}
+      warpAmount={2.5}
+      resolutionScale={1}
+    />
+  </div>
+
+  <div class="grain-overlay" aria-hidden="true"></div>
+
+  <div class="max-w-6xl mx-auto py-12 px-4 relative z-10">
+    <Hero
+      client:load
+      name={source.name}
+      description={source.description}
+      listingUrl={source.url}
+      author={source.author}
+      socials={socialLinks}
+    />
+
+    {packages.length > 0 && <SearchBar />}
+
+    <PackageGrid client:load packages={packages} listingUrl={source.url} />
+
+    <footer class="text-center mt-12 pb-8">
+      <p class="text-xs text-[var(--color-border)]">
+        Powered by <a
+          href="https://vcc.docs.vrchat.com"
+          target="_blank"
+          rel="noopener"
+          class="text-[var(--color-glow)] underline underline-offset-2 hover:text-[var(--color-orchid)] transition-colors"
+          >VPM</a
+        >
+      </p>
+    </footer>
+  </div>
+</Layout>
