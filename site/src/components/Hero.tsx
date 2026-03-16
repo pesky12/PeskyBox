@@ -84,7 +84,7 @@ export default function Hero({
         {/* Aviane Logo */}
         <div className="mx-auto w-20 h-20 mb-4 flex items-center justify-center drop-shadow-[0_0_15px_rgba(249,168,212,0.4)]">
           <img
-            src={`${import.meta.env.BASE_URL}/Aviane logo - Round Safe.png`}
+            src="/Aviane logo - Round Safe.png"
             alt="Aviane"
             className="w-full h-full object-contain"
           />
