@@ -4,10 +4,11 @@ import tailwindcss from "@tailwindcss/vite";
 import react from "@astrojs/react";
 
 export default defineConfig({
-  site: "https://pesky12.github.io",
+  site: "https://box.pesky.zone",
   base: "/PeskyBox",
   publicDir: "public",
   outDir: "dist",
+  trailingSlash: "always",
 
   vite: {
     plugins: [tailwindcss()],
