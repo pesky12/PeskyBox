@@ -1,0 +1,108 @@
+---
+interface Props {
+  listingUrl: string;
+}
+
+const { listingUrl } = Astro.props;
+---
+
+<div
+  class="animate-[fade-up_0.5s_ease-out_0.15s_both] flex flex-wrap items-center justify-center gap-3 mt-6"
+>
+  <div
+    class="flex items-center gap-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/60 backdrop-blur-sm px-4 py-2.5 min-w-0 max-w-lg"
+  >
+    <code
+      id="listingUrl"
+      class="font-mono text-sm text-[var(--color-muted)] truncate select-all"
+    >
+      {listingUrl}
+    </code>
+    <button
+      type="button"
+      id="copyUrlBtn"
+      class="shrink-0 rounded-lg px-3 py-1.5 text-sm font-medium bg-[var(--color-surface-hover)] hover:bg-[var(--color-grape)] text-[var(--color-bloom)] border border-[var(--color-border)] transition-colors cursor-pointer"
+      aria-label="Copy listing URL"
+    >
+      Copy
+    </button>
+  </div>
+  <a
+    href={`vcc://vpm/addRepo?url=${encodeURIComponent(listingUrl)}`}
+    id="addRepoBtn"
+    class="relative inline-flex items-center gap-2 rounded-xl bg-[var(--color-electric)] hover:bg-[var(--color-orchid)] text-white font-semibold px-5 py-2.5 text-sm transition-colors no-underline"
+    style="touch-action: manipulation"
+  >
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 20 20"
+      fill="currentColor"
+      aria-hidden="true"
+    >
+      <path
+        d="M10 2.5a.5.5 0 0 1 .5.5v6.5H17a.5.5 0 0 1 0 1h-6.5V17a.5.5 0 0 1-1 0v-6.5H3a.5.5 0 0 1 0-1h6.5V3a.5.5 0 0 1 .5-.5z"
+      ></path>
+    </svg>
+     Add Repo to VCC
+  </a>
+</div>
+
+<script>
+  function spawnBirdBurst(target: HTMLElement) {
+    const layer = document.createElement("span");
+    layer.className = "bird-burst-layer";
+
+    const count = 11;
+    for (let i = 0; i < count; i++) {
+      const particle = document.createElement("span");
+      particle.className = "bird-particle";
+
+      const direction = (Math.PI * 2 * i) / count + (Math.random() * 0.35 - 0.175);
+      const distance = 28 + Math.random() * 26;
+      const tx = Math.cos(direction) * distance;
+      const ty = Math.sin(direction) * distance - 16;
+      const rot = (Math.random() * 160 - 80).toFixed(1);
+      const dur = (520 + Math.random() * 260).toFixed(0);
+      const delay = (Math.random() * 70).toFixed(0);
+
+      particle.style.setProperty("--tx", `${tx.toFixed(1)}px`);
+      particle.style.setProperty("--ty", `${ty.toFixed(1)}px`);
+      particle.style.setProperty("--rot", `${rot}deg`);
+      particle.style.setProperty("--dur", `${dur}ms`);
+      particle.style.setProperty("--delay", `${delay}ms`);
+
+      layer.appendChild(particle);
+    }
+
+    target.appendChild(layer);
+    window.setTimeout(() => {
+      layer.remove();
+    }, 900);
+  }
+
+  const copyBtn = document.getElementById("copyUrlBtn");
+  const urlEl = document.getElementById("listingUrl");
+  const addRepoBtn = document.getElementById("addRepoBtn") as HTMLAnchorElement;
+
+  addRepoBtn?.addEventListener("click", (event) => {
+    event.preventDefault();
+    spawnBirdBurst(addRepoBtn);
+    const href = addRepoBtn.getAttribute("href");
+    window.setTimeout(() => {
+      if (href) {
+        window.location.href = href;
+      }
+    }, 160);
+  });
+
+  if (copyBtn && urlEl) {
+    copyBtn.addEventListener("click", async () => {
+      await navigator.clipboard.writeText(urlEl.textContent?.trim() ?? "");
+      copyBtn.textContent = "Copied!";
+      setTimeout(() => {
+        copyBtn.textContent = "Copy";
+      }, 1500);
+    });
+  }
+</script>

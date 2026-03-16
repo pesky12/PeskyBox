@@ -1,0 +1,27 @@
+{
+    "name": "Pesky's Box",
+    "id": "vpm.pesky.box",
+    "url": "https://pesky12.github.io/PeskyBox/index.json",
+    "author": {
+        "email": "Pesky12 on Discord!",
+        "name": "Pesky12",
+        "url": "https://github.com/pesky12"
+    },
+    "description": "Box full of my useful tools and utilities.",
+    "socials": {
+        "github": "https://github.com/pesky12/PeskyBox",
+        "website": "https://pesky12.github.io/PeskyBox",
+        "twitter": ""
+    },
+    "infoLink": {
+        "text": "View Source",
+        "url": "https://github.com/pesky12/PeskyBox"
+    },
+    "bannerUrl": "banner.png",
+    "githubRepos": [
+        "source:pesky12/Seat-Collision-Manager",
+        "source:pesky12/Easy-Quality-Switch",
+        "source:pesky12/Badge-Manager"
+    ],
+    "packages": []
+}

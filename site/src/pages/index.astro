@@ -1,0 +1,164 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Hero from "../components/Hero.tsx";
+import HowToVcc from "../components/HowToVcc.astro";
+import SearchBar from "../components/SearchBar.astro";
+import PackageGrid from "../components/PackageGrid.tsx";
+import DarkVeil from "../component/DarkVeil.jsx";
+import source from "../../../source.json";
+import listing from "../data/listing.json";
+
+// Resolve packages from the Nuke-generated listing.json
+// Each package ID maps to { versions: { "x.y.z": manifest } }
+interface PackageManifest {
+  name: string;
+  displayName?: string;
+  description?: string;
+  version: string;
+  author?: { name?: string; url?: string };
+  url?: string;
+  license?: string;
+  licensesUrl?: string;
+  keywords?: string[];
+  vpmDependencies?: Record<string, string>;
+}
+
+type ListingPackages = Record<
+  string,
+  { versions: Record<string, PackageManifest> }
+>;
+
+const rawPackages = (listing as { packages: ListingPackages }).packages ?? {};
+
+function semverCompare(a: string, b: string): number {
+  const pa = a.split(".").map(Number);
+  const pb = b.split(".").map(Number);
+  for (let i = 0; i < 3; i++) {
+    if ((pa[i] ?? 0) !== (pb[i] ?? 0)) return (pb[i] ?? 0) - (pa[i] ?? 0);
+  }
+  return 0;
+}
+
+const packages = Object.entries(rawPackages)
+  .map(([id, pkg]) => {
+    const versions = Object.keys(pkg.versions).sort(semverCompare);
+    const latest = pkg.versions[versions[0]];
+    if (!latest) return null;
+
+    const deps = latest.vpmDependencies
+      ? Object.entries(latest.vpmDependencies).map(([name, version]) => ({
+          name,
+          version,
+        }))
+      : [];
+
+    let type = "Any";
+    if (deps.some((d) => d.name.includes("avatars"))) type = "Avatar";
+    else if (deps.some((d) => d.name.includes("worlds"))) type = "World";
+
+    return {
+      id,
+      displayName: latest.displayName ?? id,
+      description: latest.description ?? "",
+      version: latest.version,
+      type,
+      authorName: latest.author?.name,
+      authorUrl: latest.author?.url,
+      zipUrl: latest.url,
+      license: latest.license,
+      licensesUrl: latest.licensesUrl,
+      keywords: latest.keywords ?? [],
+      dependencies: deps,
+    };
+  })
+  .filter(Boolean) as NonNullable<
+  ReturnType<
+    typeof Object.entries<{
+      versions: Record<string, PackageManifest>;
+    }>
+  >[number] extends [string, infer _]
+    ? {
+        id: string;
+        displayName: string;
+        description: string;
+        version: string;
+        type: string;
+        authorName?: string;
+        authorUrl?: string;
+        zipUrl?: string;
+        license?: string;
+        licensesUrl?: string;
+        keywords: string[];
+        dependencies: { name: string; version: string }[];
+      }
+    : never
+>[];
+
+const bannerUrl = source.bannerUrl
+  ? `${import.meta.env.BASE_URL}/${source.bannerUrl}`
+  : null;
+
+const socialLinks = [
+  {
+    key: "github",
+    label: "GitHub",
+    href: source.socials?.github,
+  },
+  {
+    key: "website",
+    label: "Website",
+    href: source.socials?.website,
+  },
+  {
+    key: "twitter",
+    label: "Twitter",
+    href: source.socials?.twitter,
+  },
+].filter((item) => typeof item.href === "string" && item.href.trim().length > 0);
+---
+
+<Layout title={source.name} description={source.description}>
+  <div class="relative min-h-screen">
+    <div class="fixed inset-0 -z-10 overflow-hidden">
+      <DarkVeil
+        client:load
+        hueShift={266}
+        noiseIntensity={0}
+        scanlineIntensity={0.28}
+        speed={0.7}
+        scanlineFrequency={2.7}
+        warpAmount={2.5}
+        resolutionScale={1}
+      />
+    </div>
+
+    <main class="max-w-6xl mx-auto py-12 px-4 relative z-10">
+      <Hero
+        client:load
+        name={source.name}
+        description={source.description}
+        listingUrl={source.url}
+        author={source.author}
+        socials={socialLinks}
+      />
+
+      <HowToVcc />
+
+      {packages.length > 0 && <SearchBar />}
+
+      <PackageGrid client:load packages={packages} listingUrl={source.url} />
+
+    <footer class="text-center mt-12 pb-8">
+      <p class="text-xs text-[var(--color-border)]">
+        Powered by <a
+          href="https://vcc.docs.vrchat.com"
+          target="_blank"
+          rel="noopener"
+          class="text-[var(--color-border)] hover:text-[var(--color-orchid)] transition-colors"
+          >VPM</a
+        >
+      </p>
+    </footer>
+  </main>
+  </div>
+</Layout>

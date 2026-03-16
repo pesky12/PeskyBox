@@ -1,0 +1,78 @@
+---
+
+---
+
+<div id="how-to-vcc"></div>
+<dialog
+  id="howToModal"
+  class="m-auto fixed inset-0 max-w-md w-full rounded-2xl border border-white/10 bg-[var(--color-abyss)]/90 text-[var(--color-bloom)] p-0 backdrop:bg-black/60 backdrop:backdrop-blur-xl"
+>
+  <div class="p-6">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-lg font-bold text-white m-0">
+        How to add this listing to VCC
+      </h3>
+      <button
+        type="button"
+        id="howToClose"
+        class="shrink-0 rounded-lg p-1.5 hover:bg-white/10 text-white/60 hover:text-white transition-colors cursor-pointer border-none bg-transparent"
+        aria-label="Close"
+      >
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+          aria-hidden="true"
+        >
+          <path
+            d="M4.15 4.15a.5.5 0 0 1 .7 0L10 9.29l5.15-5.14a.5.5 0 0 1 .7.7L10.71 10l5.14 5.15a.5.5 0 0 1-.7.7L10 10.71l-5.15 5.14a.5.5 0 0 1-.7-.7L9.29 10 4.15 4.85a.5.5 0 0 1 0-.7Z"
+          ></path>
+        </svg>
+      </button>
+    </div>
+
+    <ol
+      class="text-sm text-white/80 space-y-2 pl-5 m-0 list-decimal"
+    >
+      <li>Open your <strong class="text-white">VCC</strong> and go to <strong class="text-white">Settings</strong></li>
+      <li>Click the <strong class="text-white">Packages</strong> tab</li>
+      <li>Click <strong class="text-white">Add Repository</strong></li>
+      <li>Paste the listing URL and click <strong class="text-white">Add</strong></li>
+      <li>Check the info and click <strong class="text-white">I Understand</strong></li>
+      <li>Go to any project to see the packages.</li>
+    </ol>
+
+    <p class="text-xs text-white/60 mt-4 mb-0">
+      More info at <a
+        href="https://vcc.docs.vrchat.com"
+        target="_blank"
+        rel="noopener"
+        class="text-[var(--color-glow)] hover:underline">vcc.docs.vrchat.com</a
+      >
+    </p>
+  </div>
+</dialog>
+
+<script>
+  const dialog = document.getElementById("howToModal") as HTMLDialogElement;
+  const close = document.getElementById("howToClose");
+
+  // Listen for hash changes to open modal from Hero link
+  const checkHash = () => {
+    if (window.location.hash === "#how-to-vcc") {
+      dialog?.showModal();
+      // Remove hash without scrolling or triggering another hashchange
+      history.replaceState(null, "", window.location.pathname + window.location.search);
+    }
+  };
+
+  window.addEventListener("hashchange", checkHash);
+  // Also check on load
+  checkHash();
+
+  close?.addEventListener("click", () => dialog?.close());
+  dialog?.addEventListener("click", (e) => {
+    if (e.target === dialog) dialog.close();
+  });
+</script>

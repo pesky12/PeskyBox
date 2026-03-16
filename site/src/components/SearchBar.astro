@@ -1,0 +1,70 @@
+---
+---
+
+<div
+  class="animate-[fade-up_0.5s_ease-out_0.25s_both] w-full max-w-2xl mx-auto mt-12 mb-4 px-4"
+>
+  <div class="relative group">
+    <div
+      class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none z-10"
+    >
+      <div class="transition-all duration-200 group-focus-within:scale-110 group-focus-within:text-[var(--color-orchid)] flex items-center">
+        <svg
+          class="w-[18px] h-[18px] text-[var(--color-muted)] transition-colors duration-200 group-focus-within:text-[var(--color-orchid)]"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <circle cx="11" cy="11" r="8" />
+          <path d="m21 21-4.34-4.34" />
+        </svg>
+      </div>
+    </div>
+    <input
+      type="text"
+      id="packageSearch"
+      placeholder="Search packages... (e.g. Udon, Audio)"
+      autocomplete="off"
+      spellcheck="false"
+      class="w-full h-14 pl-12 pr-12 rounded-2xl bg-[var(--color-surface)]/20 border border-[var(--color-border)] focus:border-[var(--color-orchid)] text-white placeholder:text-[var(--color-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-orchid)]/20 transition-all backdrop-blur-sm"
+    />
+    <div
+      class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none"
+    >
+      <kbd
+        class="hidden sm:inline-block px-2 py-1 text-[10px] font-mono font-bold text-[var(--color-muted)] bg-[var(--color-surface-hover)] border border-[var(--color-border)] rounded"
+      >
+        /
+      </kbd>
+    </div>
+  </div>
+</div>
+
+<script>
+  const searchInput = document.getElementById(
+    "packageSearch"
+  ) as HTMLInputElement;
+
+  // Shortcut key
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "/" && document.activeElement !== searchInput) {
+      e.preventDefault();
+      searchInput?.focus();
+    }
+  });
+
+  searchInput?.addEventListener("input", () => {
+    const query = searchInput.value.toLowerCase();
+    document.querySelectorAll<HTMLElement>(".package-card").forEach((card) => {
+      const name = card.dataset.packageName ?? "";
+      const id = card.dataset.packageId ?? "";
+      card.style.display =
+        !query || name.includes(query) || id.includes(query) ? "" : "none";
+    });
+  });
+</script>

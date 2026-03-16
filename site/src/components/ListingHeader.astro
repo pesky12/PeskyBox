@@ -1,0 +1,18 @@
+---
+interface Props {
+  name: string;
+  url: string;
+}
+
+const { name, url } = Astro.props;
+---
+
+<header class="animate-[fade-up_0.5s_ease-out_both] flex flex-col items-center gap-1 text-center px-4">
+  <slot name="banner" />
+
+  <slot name="description" />
+
+  <slot name="author" />
+
+  <slot name="socials" />
+</header>
