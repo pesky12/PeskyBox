@@ -6,8 +6,8 @@
 
 *A box full of useful VRChat tools and utilities.*
 
-[![Website](https://img.shields.io/badge/Website-8B5CF6?style=flat-square&logo=github&logoColor=white)](https://pesky12.github.io/PeskyBox)
-[![VPM](https://img.shields.io/badge/VPM%20Listing-EC4899?style=flat-square&logo=unity&logoColor=white)](https://pesky12.github.io/PeskyBox/index.json)
+[![Website](https://img.shields.io/badge/Website-8B5CF6?style=flat-square&logo=github&logoColor=white)](https://box.pesky.zone)
+[![VPM](https://img.shields.io/badge/VPM%20Listing-EC4899?style=flat-square&logo=unity&logoColor=white)](https://box.pesky.zone/PeskyBox/index.json)
 
 </div>
 

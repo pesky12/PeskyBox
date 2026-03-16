@@ -5,7 +5,7 @@ import react from "@astrojs/react";
 
 export default defineConfig({
   site: "https://box.pesky.zone",
-  base: "/PeskyBox",
+  base: "/PeskyBox/",
   publicDir: "public",
   outDir: "dist",
   trailingSlash: "always",
