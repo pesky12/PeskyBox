@@ -1,7 +1,7 @@
-@import "tailwindcss";
-
 /* Satoshi font from Fontshare */
 @import url('https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap');
+
+@import "tailwindcss";
 
 @font-face {
   font-family: "JetBrains Mono";
@@ -85,8 +85,6 @@ body {
 
 dialog[open] {
   animation: dialog-enter 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  /* Since it's m-auto, transform translate(-50%, -50%) would ruin m-auto centering. 
-     Wait, it's just m-auto, so no need for translate, just scale */
 }
 
 @keyframes dialog-enter-simple {
