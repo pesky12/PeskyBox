@@ -59,9 +59,15 @@ export default function Hero({
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(listingUrl);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(listingUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy to clipboard:", err);
+      // Fallback: show the URL in an alert for accessibility
+      window.prompt("Copy this URL:", listingUrl);
+    }
   };
 
   const addUrl = `vcc://vpm/addRepo?url=${encodeURIComponent(listingUrl)}`;
@@ -85,8 +91,10 @@ export default function Hero({
         <div className="mx-auto w-20 h-20 mb-4 flex items-center justify-center drop-shadow-[0_0_15px_rgba(249,168,212,0.4)]">
           <img
             src="/Aviane logo - Round Safe.png"
-            alt="Aviane"
+            alt="PeskyBox logo - Aviane brand mark"
             className="w-full h-full object-contain"
+            loading="eager"
+            decoding="async"
           />
         </div>
 

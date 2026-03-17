@@ -138,14 +138,25 @@ function PackageModal({ pkg, listingUrl, onClose }: PackageModalProps) {
   }, []);
 
   const handleCopyListingUrl = async () => {
-    await navigator.clipboard.writeText(listingUrl);
-    setCopyLabel("Copied!");
-    if (copyTimeoutRef.current !== null) {
-      window.clearTimeout(copyTimeoutRef.current);
+    try {
+      await navigator.clipboard.writeText(listingUrl);
+      setCopyLabel("Copied!");
+      if (copyTimeoutRef.current !== null) {
+        window.clearTimeout(copyTimeoutRef.current);
+      }
+      copyTimeoutRef.current = window.setTimeout(() => {
+        setCopyLabel("Copy");
+      }, 1500);
+    } catch (err) {
+      console.error("Failed to copy:", err);
+      setCopyLabel("Failed");
+      if (copyTimeoutRef.current !== null) {
+        window.clearTimeout(copyTimeoutRef.current);
+      }
+      copyTimeoutRef.current = window.setTimeout(() => {
+        setCopyLabel("Copy");
+      }, 2000);
     }
-    copyTimeoutRef.current = window.setTimeout(() => {
-      setCopyLabel("Copy");
-    }, 1500);
   };
 
   if (!pkg) return null;
@@ -162,6 +173,8 @@ function PackageModal({ pkg, listingUrl, onClose }: PackageModalProps) {
       }}
       onClose={onClose}
       aria-labelledby="pkg-modal-name"
+      aria-modal="true"
+      role="dialog"
     >
       <div className="px-6 py-6 sm:px-8 sm:py-8 flex flex-col gap-6 relative z-10">
         <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-electric)]/10 via-transparent to-[var(--color-orchid)]/5 pointer-events-none -z-10" />
@@ -209,8 +222,8 @@ function PackageModal({ pkg, listingUrl, onClose }: PackageModalProps) {
           <h4 className="text-[13px] font-bold text-[var(--color-orchid)] m-0 mb-2">
             Description
           </h4>
-          <p className="text-[15px] text-[var(--color-bloom)]/90 leading-relaxed m-0 border-none">
-            {pkg.description}
+          <p className="text-[15px] text-[var(--color-bloom)]/90 leading-relaxed m-0 border-none overflow-wrap-break-word">
+            {pkg.description || "No description available."}
           </p>
         </section>
 
@@ -223,7 +236,7 @@ function PackageModal({ pkg, listingUrl, onClose }: PackageModalProps) {
               href={pkg.authorUrl ?? "#"}
               target="_blank"
               rel="noopener"
-              className="text-[15px] text-[var(--color-glow)] hover:underline no-underline"
+              className="text-[15px] text-[var(--color-glow)] hover:underline no-underline break-all"
             >
               {pkg.authorName}
             </a>
@@ -233,15 +246,12 @@ function PackageModal({ pkg, listingUrl, onClose }: PackageModalProps) {
         {pkg.dependencies.length > 0 && (
           <section>
             <h4 className="text-[13px] font-bold text-[var(--color-orchid)] m-0 mb-2">
-              Dependencies
+              Dependencies ({pkg.dependencies.length})
             </h4>
-            <ul className="text-[15px] text-[#b4a9c0] list-disc pl-5 m-0 space-y-1 marker:text-[var(--color-muted)]">
+            <ul className="text-[15px] text-[#b4a9c0] list-disc pl-5 m-0 space-y-1 marker:text-[var(--color-muted)] max-h-40 overflow-y-auto">
               {pkg.dependencies.map((dep) => (
-                <li key={`${dep.name}:${dep.version}`}>
-                  {dep.name}{" "}
-                  <span className="text-[var(--color-muted)] text-[13px] ml-1">
-                    @ v{dep.version}
-                  </span>
+                <li key={`${dep.name}:${dep.version}`} className="break-all">
+                  <code className="text-[13px] font-mono">{dep.name}</code>{" "}
                 </li>
               ))}
             </ul>
@@ -254,14 +264,20 @@ function PackageModal({ pkg, listingUrl, onClose }: PackageModalProps) {
               Keywords
             </h4>
             <div className="flex flex-wrap gap-2">
-              {pkg.keywords.map((kw) => (
+              {pkg.keywords.slice(0, 10).map((kw) => (
                 <span
                   key={kw}
-                  className="text-[12px] rounded-full px-3 py-0.5 border border-[var(--color-orchid)]/30 text-[var(--color-orchid)] bg-white/[0.02]"
+                  className="text-[12px] rounded-full px-3 py-0.5 border border-[var(--color-orchid)]/30 text-[var(--color-orchid)] bg-white/[0.02] break-all max-w-full"
+                  title={kw}
                 >
-                  {kw}
+                  {kw.length > 20 ? `${kw.slice(0, 20)}...` : kw}
                 </span>
               ))}
+              {pkg.keywords.length > 10 && (
+                <span className="text-[12px] text-[var(--color-muted)] px-1">
+                  +{pkg.keywords.length - 10} more
+                </span>
+              )}
             </div>
           </section>
         )}
@@ -326,6 +342,7 @@ function renderButton(
   onSelect: (selected: Package) => void,
 ) {
   const addUrl = `vcc://vpm/addRepo?url=${encodeURIComponent(listingUrl)}`;
+  const tooltipId = `vcc-tooltip-${pkg.id.replace(/[^a-zA-Z0-9]/g, "-")}`;
 
   return (
     <div className="flex flex-col gap-2 relative">
@@ -334,6 +351,7 @@ function renderButton(
           href={addUrl}
           className="group/add relative flex-1 inline-flex items-center justify-center gap-2 rounded-full border border-white/20 bg-[var(--color-electric)]/20 hover:bg-[var(--color-electric)] text-white text-sm font-bold px-5 py-2 transition-all no-underline"
           aria-label={`Open ${pkg.displayName} in VCC`}
+          aria-describedby={tooltipId}
           onClick={(event) => {
             event.preventDefault();
             const target = event.currentTarget;
@@ -345,6 +363,7 @@ function renderButton(
         >
           <VccIcon /> Open in VCC
           <span
+            id={tooltipId}
             role="tooltip"
             className="pointer-events-none absolute -top-11 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border border-[var(--color-border)] bg-[var(--color-surface)]/95 px-3 py-1 text-[11px] font-medium text-[var(--color-muted)] opacity-0 translate-y-1 transition-all duration-200 group-hover/add:opacity-100 group-hover/add:translate-y-0 group-focus-visible/add:opacity-100 group-focus-visible/add:translate-y-0"
           >
@@ -421,9 +440,10 @@ export default function PackageGrid({
         {packages.map((pkg) => (
           <motion.div key={pkg.id} variants={itemVariants} className="h-full">
             <article
-              className="package-card flex flex-col h-full rounded-2xl border border-white/10 bg-[var(--color-abyss)]/70 backdrop-blur-xl p-5 shadow-lg transition-all duration-300 hover:border-[var(--color-orchid)]/60 hover:bg-[var(--color-abyss)]/80 hover:-translate-y-1 hover:shadow-[0_8px_30px_rgba(192,132,252,0.12)] group relative overflow-hidden"
+              className="package-card flex flex-col h-full rounded-2xl border border-white/10 bg-[var(--color-abyss)]/70 backdrop-blur-xl p-5 shadow-lg transition-all duration-300 hover:border-[var(--color-orchid)]/60 hover:bg-[var(--color-abyss)]/80 hover:-translate-y-1 hover:shadow-[0_8px_30px_rgba(192,132,252,0.12)] focus-within:border-[var(--color-orchid)]/60 focus-within:bg-[var(--color-abyss)]/80 focus-within:-translate-y-1 focus-within:shadow-[0_8px_30px_rgba(192,132,252,0.12)] group relative overflow-hidden"
               data-package-name={pkg.displayName.toLowerCase()}
               data-package-id={pkg.id.toLowerCase()}
+              tabIndex={0}
               onMouseMove={(event) => {
                 const bounds = event.currentTarget.getBoundingClientRect();
                 event.currentTarget.style.setProperty(
@@ -435,10 +455,19 @@ export default function PackageGrid({
                   `${event.clientY - bounds.top}px`,
                 );
               }}
+              onKeyDown={(event) => {
+                // Allow keyboard navigation to trigger the glow effect
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  const card = event.currentTarget;
+                  const infoButton = card.querySelector('[aria-label^="View details"]') as HTMLButtonElement;
+                  infoButton?.click();
+                }
+              }}
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-electric)]/0 via-[var(--color-orchid)]/0 to-[var(--color-flash)]/0 group-hover:from-[var(--color-electric)]/5 group-hover:to-[var(--color-flash)]/10 transition-colors duration-300 pointer-events-none -z-10 rounded-2xl" />
+              <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-electric)]/0 via-[var(--color-orchid)]/0 to-[var(--color-flash)]/0 group-hover:from-[var(--color-electric)]/5 group-hover:to-[var(--color-flash)]/10 group-focus-within:from-[var(--color-electric)]/5 group-focus-within:to-[var(--color-flash)]/10 transition-colors duration-300 pointer-events-none -z-10 rounded-2xl" />
               <div
-                className="pointer-events-none absolute -inset-px rounded-2xl opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                className="pointer-events-none absolute -inset-px rounded-2xl opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-within:opacity-100"
                 style={{
                   background:
                     "radial-gradient(450px circle at var(--mouse-x) var(--mouse-y), color-mix(in srgb, var(--color-orchid) 18%, transparent), transparent 45%)",
@@ -446,9 +475,9 @@ export default function PackageGrid({
               />
 
               <div className="flex-1">
-                <div className="flex items-start justify-between gap-3 mb-3">
+                <div className="flex items-start justify-between gap-3 mb-3 min-w-0">
                   <h3
-                    className="text-[1.1rem] font-bold text-white leading-tight m-0"
+                    className="text-[1.1rem] font-bold text-white leading-tight m-0 truncate min-w-0 flex-1"
                     title={pkg.displayName}
                   >
                     {pkg.displayName}
@@ -464,20 +493,20 @@ export default function PackageGrid({
                   </span>
                 </div>
 
-                <p className="text-sm text-white/90 mt-0 mb-3 line-clamp-3 leading-relaxed font-medium">
+                <p className="text-sm text-white/90 mt-0 mb-3 line-clamp-3 leading-relaxed font-medium overflow-hidden">
                   {pkg.description}
                 </p>
               </div>
 
               <div className="flex flex-col justify-end mt-6 pt-5 border-t border-white/10 relative">
-                <div className="flex justify-between items-center mb-4">
+                <div className="flex justify-between items-center mb-4 min-w-0">
                   <code
-                    className="text-xs font-mono text-white/95 truncate max-w-[70%]"
+                    className="text-xs font-mono text-white/95 truncate max-w-[70%] min-w-0"
                     title={pkg.id}
                   >
                     {pkg.id}
                   </code>
-                  <code className="text-[11px] font-mono font-bold text-[var(--color-orchid)] bg-[var(--color-orchid)]/10 px-1.5 py-0.5 rounded">
+                  <code className="text-[11px] font-mono font-bold text-[var(--color-orchid)] bg-[var(--color-orchid)]/10 px-1.5 py-0.5 rounded shrink-0">
                     v{pkg.version}
                   </code>
                 </div>

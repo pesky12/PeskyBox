@@ -21,7 +21,14 @@ const { title, description = "VPM package listing" } = Astro.props;
     <link rel="apple-touch-icon" href="/Aviane logo - Round Safe.png" />
   </head>
   <body class="bg-[#07000d] min-h-screen antialiased overflow-x-hidden">
-    <main class="relative z-10">
+    <!-- Skip to content link for keyboard navigation -->
+    <a
+      href="#main-content"
+      class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-[var(--color-electric)] focus:text-white focus:rounded-lg focus:font-medium focus:outline-none focus:ring-2 focus:ring-white"
+    >
+      Skip to main content
+    </a>
+    <main id="main-content" class="relative z-10" role="main">
       <slot />
     </main>
   </body>

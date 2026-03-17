@@ -39,60 +39,88 @@ function semverCompare(a: string, b: string): number {
   return 0;
 }
 
-const packages = Object.entries(rawPackages)
-  .map(([id, pkg]) => {
-    const versions = Object.keys(pkg.versions).sort(semverCompare);
+// Safely process packages with error handling for malformed data
+function processPackage(
+  id: string,
+  pkg: { versions: Record<string, PackageManifest> }
+): {
+  id: string;
+  displayName: string;
+  description: string;
+  version: string;
+  type: string;
+  authorName?: string;
+  authorUrl?: string;
+  zipUrl?: string;
+  license?: string;
+  licensesUrl?: string;
+  keywords: string[];
+  dependencies: { name: string; version: string }[];
+} | null {
+  try {
+    // Validate package structure
+    if (!pkg || typeof pkg !== "object" || !pkg.versions) {
+      console.warn(`Invalid package structure for ${id}`);
+      return null;
+    }
+
+    const versionKeys = Object.keys(pkg.versions);
+    if (versionKeys.length === 0) {
+      console.warn(`No versions found for package ${id}`);
+      return null;
+    }
+
+    const versions = versionKeys.sort(semverCompare);
     const latest = pkg.versions[versions[0]];
-    if (!latest) return null;
+    if (!latest) {
+      console.warn(`Could not resolve latest version for ${id}`);
+      return null;
+    }
 
-    const deps = latest.vpmDependencies
-      ? Object.entries(latest.vpmDependencies).map(([name, version]) => ({
-          name,
-          version,
-        }))
-      : [];
+    // Validate required fields
+    if (!latest.version) {
+      console.warn(`Missing version in latest release for ${id}`);
+      return null;
+    }
 
+    // Safely extract dependencies
+    const deps: { name: string; version: string }[] = [];
+    if (latest.vpmDependencies && typeof latest.vpmDependencies === "object") {
+      for (const [name, version] of Object.entries(latest.vpmDependencies)) {
+        if (typeof version === "string") {
+          deps.push({ name, version });
+        }
+      }
+    }
+
+    // Determine package type
     let type = "Any";
     if (deps.some((d) => d.name.includes("avatars"))) type = "Avatar";
     else if (deps.some((d) => d.name.includes("worlds"))) type = "World";
 
     return {
       id,
-      displayName: latest.displayName ?? id,
-      description: latest.description ?? "",
+      displayName: latest.displayName?.trim() || id,
+      description: latest.description?.trim() || "",
       version: latest.version,
       type,
-      authorName: latest.author?.name,
-      authorUrl: latest.author?.url,
-      zipUrl: latest.url,
-      license: latest.license,
-      licensesUrl: latest.licensesUrl,
-      keywords: latest.keywords ?? [],
+      authorName: latest.author?.name?.trim(),
+      authorUrl: latest.author?.url?.trim(),
+      zipUrl: latest.url?.trim(),
+      license: latest.license?.trim(),
+      licensesUrl: latest.licensesUrl?.trim(),
+      keywords: Array.isArray(latest.keywords) ? latest.keywords.filter((k): k is string => typeof k === "string") : [],
       dependencies: deps,
     };
-  })
-  .filter(Boolean) as NonNullable<
-  ReturnType<
-    typeof Object.entries<{
-      versions: Record<string, PackageManifest>;
-    }>
-  >[number] extends [string, infer _]
-    ? {
-        id: string;
-        displayName: string;
-        description: string;
-        version: string;
-        type: string;
-        authorName?: string;
-        authorUrl?: string;
-        zipUrl?: string;
-        license?: string;
-        licensesUrl?: string;
-        keywords: string[];
-        dependencies: { name: string; version: string }[];
-      }
-    : never
->[];
+  } catch (error) {
+    console.error(`Error processing package ${id}:`, error);
+    return null;
+  }
+}
+
+const packages = Object.entries(rawPackages)
+  .map(([id, pkg]) => processPackage(id, pkg))
+  .filter((pkg): pkg is NonNullable<ReturnType<typeof processPackage>> => pkg !== null);
 
 const bannerUrl = source.bannerUrl
   ? `${import.meta.env.BASE_URL}/${source.bannerUrl}`

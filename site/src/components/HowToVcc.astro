@@ -6,10 +6,13 @@
 <dialog
   id="howToModal"
   class="m-auto fixed inset-0 max-w-md w-full rounded-2xl border border-white/10 bg-[var(--color-abyss)]/90 text-[var(--color-bloom)] p-0 backdrop:bg-black/60 backdrop:backdrop-blur-xl"
+  aria-modal="true"
+  role="dialog"
+  aria-labelledby="how-to-title"
 >
   <div class="p-6">
     <div class="flex items-center justify-between mb-4">
-      <h3 class="text-lg font-bold text-white m-0">
+      <h3 id="how-to-title" class="text-lg font-bold text-white m-0">
         How to add this listing to VCC
       </h3>
       <button
