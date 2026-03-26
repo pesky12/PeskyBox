@@ -21,7 +21,8 @@
     "githubRepos": [
         "source:pesky12/Seat-Collision-Manager",
         "source:pesky12/Easy-Quality-Switch",
-        "source:pesky12/Badge-Manager"
+        "source:pesky12/Badge-Manager",
+        "source:pesky12/Simple-Udon-Toggle"
     ],
     "packages": []
 }
