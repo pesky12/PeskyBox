@@ -2,7 +2,7 @@ name: Build VPM Listing
 
 on:
   push:
-    branches: [main]
+    branches: [master]
     paths:
       - 'source.json'
       - '.github/workflows/**'
