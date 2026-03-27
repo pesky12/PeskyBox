@@ -10,9 +10,9 @@
     <div
       class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none z-10"
     >
-      <div class="transition-all duration-200 group-focus-within:scale-110 group-focus-within:text-[var(--color-orchid)] flex items-center">
+      <div class="transition-all duration-200 group-focus-within:scale-110 group-focus-within:text-[var(--color-electric)] flex items-center">
         <svg
-          class="w-[18px] h-[18px] text-[var(--color-muted)] transition-colors duration-200 group-focus-within:text-[var(--color-orchid)]"
+          class="w-[18px] h-[18px] text-[var(--color-muted)] transition-colors duration-200 group-focus-within:text-[var(--color-electric)]"
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
           fill="none"
@@ -36,18 +36,8 @@
       aria-label="Search packages by name or ID"
       aria-describedby="search-hint"
       aria-controls="search-results"
-      class="w-full h-14 pl-12 pr-12 rounded-2xl bg-[var(--color-surface)]/20 border border-[var(--color-border)] focus:border-[var(--color-orchid)] text-white placeholder:text-[var(--color-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-orchid)]/20 transition-all backdrop-blur-sm"
+      class="w-full h-14 pl-12 pr-4 rounded-[25px] bg-[var(--color-void)]/70 border-2 border-[var(--color-border)] focus:border-[var(--color-electric)] text-white placeholder:text-[var(--color-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-electric)]/20 transition-all backdrop-blur-sm"
     />
-    <div
-      class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none"
-    >
-      <kbd
-        class="hidden sm:inline-block px-2 py-1 text-[10px] font-mono font-bold text-[var(--color-muted)] bg-[var(--color-surface-hover)] border border-[var(--color-border)] rounded"
-        aria-label="Press slash key to focus search"
-      >
-        /
-      </kbd>
-    </div>
   </div>
   <div id="search-hint" class="sr-only">
     Type to filter packages. Results update automatically.
@@ -79,23 +69,6 @@
   const emptyState = document.getElementById("search-empty-state");
   let debounceTimer: number | null = null;
 
-  // Debounce utility for performance
-  function debounce(fn: (query: string) => void, delay: number) {
-    return (query: string) => {
-      if (debounceTimer) window.clearTimeout(debounceTimer);
-      debounceTimer = window.setTimeout(() => fn(query), delay);
-    };
-  }
-
-  // Shortcut key
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "/" && document.activeElement !== searchInput) {
-      e.preventDefault();
-      searchInput?.focus();
-    }
-  });
-
-  // Escape key clears search
   searchInput?.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
       searchInput.value = "";
@@ -106,50 +79,38 @@
 
   function performSearch(query: string) {
     const normalizedQuery = query.toLowerCase().trim();
-    const cards = document.querySelectorAll<HTMLElement>(".package-card");
+    const items = document.querySelectorAll<HTMLElement>("[data-package-item]");
     let visibleCount = 0;
-    let totalCount = cards.length;
+    const totalCount = items.length;
 
-    cards.forEach((card) => {
-      const name = card.dataset.packageName ?? "";
-      const id = card.dataset.packageId ?? "";
+    items.forEach((item) => {
+      const name = item.dataset.packageName ?? "";
+      const id = item.dataset.packageId ?? "";
       const shouldShow = !normalizedQuery || name.includes(normalizedQuery) || id.includes(normalizedQuery);
-      card.style.display = shouldShow ? "" : "none";
+      item.hidden = !shouldShow;
       if (shouldShow) visibleCount++;
     });
 
-    // Announce results to screen readers
     if (searchResults) {
-      if (normalizedQuery) {
-        if (visibleCount === 0) {
-          searchResults.textContent = `No packages found for "${query}". Try a different search term.`;
-        } else {
-          searchResults.textContent = `Showing ${visibleCount} of ${totalCount} packages`;
-        }
+      if (normalizedQuery && visibleCount === 0) {
+        searchResults.textContent = `No packages found for "${query}". Try a different search term.`;
+      } else if (normalizedQuery) {
+        searchResults.textContent = `Showing ${visibleCount} of ${totalCount} packages`;
       } else {
         searchResults.textContent = `Showing all ${totalCount} packages`;
       }
     }
 
-    // Show/hide empty state
-    if (emptyState) {
-      if (normalizedQuery && visibleCount === 0) {
-        emptyState.classList.remove("hidden");
-      } else {
-        emptyState.classList.add("hidden");
-      }
-    }
+    emptyState?.classList.toggle("hidden", !(normalizedQuery && visibleCount === 0));
   }
 
-  const debouncedSearch = debounce(performSearch, 150);
-
   searchInput?.addEventListener("input", () => {
-    debouncedSearch(searchInput.value);
+    if (debounceTimer) window.clearTimeout(debounceTimer);
+    debounceTimer = window.setTimeout(() => performSearch(searchInput.value), 150);
   });
 
-  // Initial announcement
-  const initialCards = document.querySelectorAll<HTMLElement>(".package-card");
-  if (searchResults && initialCards.length > 0) {
-    searchResults.textContent = `${initialCards.length} packages available`;
+  const initialItems = document.querySelectorAll<HTMLElement>("[data-package-item]");
+  if (searchResults && initialItems.length > 0) {
+    searchResults.textContent = `${initialItems.length} packages available`;
   }
 </script>

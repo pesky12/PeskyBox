@@ -1,7 +1,17 @@
-/* Satoshi font from Fontshare */
-@import url('https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap');
+@import url('https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600&display=swap');
+
+@import url('https://fonts.googleapis.com/css2?family=Fragment+Mono&display=swap');
 
 @import "tailwindcss";
+
+@font-face {
+  font-family: "Poppins";
+  src: url("https://cdn.jsdelivr.net/npm/@fontsource/poppins@5.0.0/files/poppins-latin-300-normal.woff2")
+    format("woff2");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
 
 @font-face {
   font-family: "JetBrains Mono";
@@ -12,26 +22,53 @@
   font-display: swap;
 }
 
-@theme inline {
-  --font-sans: "Satoshi", system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+@font-face {
+  font-family: "Poppins";
+  src: url("https://cdn.jsdelivr.net/npm/@fontsource/poppins@5.0.0/files/poppins-latin-400-normal.woff2")
+    format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
 
-  --color-void: #07000d;
-  --color-abyss: #0c0015;
-  --color-deep: #12001f;
-  --color-plum: #1a0030;
-  --color-grape: #2a0050;
-  --color-electric: #9333ea;
-  --color-orchid: #c084fc;
-  --color-bloom: #e9d5ff;
-  --color-glow: #f0abfc;
-  --color-flash: #f9a8d4;
-  --color-surface: #1e1028;
-  --color-surface-hover: #291540;
-  --color-border: #3b1d5e;
-  --color-border-subtle: #2a1345;
-  --color-muted: #9ca3af;
-  --color-code: #d1c5e2;
+@font-face {
+  font-family: "Poppins";
+  src: url("https://cdn.jsdelivr.net/npm/@fontsource/poppins@5.0.0/files/poppins-latin-500-normal.woff2")
+    format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Poppins";
+  src: url("https://cdn.jsdelivr.net/npm/@fontsource/poppins@5.0.0/files/poppins-latin-700-normal.woff2")
+    format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@theme inline {
+  --font-sans: "Poppins", system-ui, sans-serif;
+  --font-display: "Clash Display", "Poppins", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --font-fragment: "Fragment Mono", ui-monospace, monospace;
+
+  --color-void: #0d0d0d;
+  --color-abyss: #090909;
+  --color-electric: #ec028d;
+  --color-hot-hover: #ff1a99;
+  --color-spark: #fff826;
+  --color-orchid: #f6a6ff;
+  --color-bloom: #ffffff;
+  --color-glow: #0099ff;
+  --color-flash: #edcbf0;
+  --color-surface: #1a1a1a;
+  --color-surface-hover: #242424;
+  --color-border: #5e5e5ea1;
+  --color-muted: #9a9a9a;
+  --color-package-meta: #c7c7c7;
 }
 
 * {
@@ -57,8 +94,27 @@ body {
 }
 
 :focus-visible {
-  outline: 2px solid var(--color-orchid);
+  outline: 2px solid var(--color-electric);
   outline-offset: 2px;
+}
+
+/* Zone tiled noise texture, color-dodge blended like the source site */
+.grain-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  opacity: 0.1;
+  mix-blend-mode: color-dodge;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 120px auto;
+  background-repeat: repeat;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grain-overlay {
+    display: none;
+  }
 }
 
 @keyframes fade-up {
@@ -70,21 +126,6 @@ body {
     opacity: 1;
     transform: translateY(0);
   }
-}
-
-@keyframes dialog-enter {
-  from {
-    opacity: 0;
-    transform: scale(0.95) translate(-50%, -50%);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translate(-50%, -50%);
-  }
-}
-
-dialog[open] {
-  animation: dialog-enter 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes dialog-enter-simple {
@@ -109,6 +150,48 @@ dialog[open]#pkgModal {
 
 dialog[open]#pkgModal::backdrop {
   animation: backdrop-fade 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* --- Card surface: shared by the grid cards and the info modal --- */
+.card-surface {
+  position: relative;
+  border-radius: 36px;
+  background: #000;
+  border: 1px solid #a6a6a6a1;
+  box-shadow:
+    0 0.6px 0.8px -0.75px rgb(0 0 0 / 0.4),
+    0 1.8px 2.5px -1.5px rgb(0 0 0 / 0.39),
+    0 4.8px 6.7px -2.25px rgb(0 0 0 / 0.36),
+    0 15px 21px -3px rgb(0 0 0 / 0.27);
+  transition: border-color 0.2s;
+}
+
+.card-surface:hover,
+.card-surface:focus-within {
+  border-color: rgb(255 255 255 / 0.63);
+}
+
+.package-card-dots {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  -webkit-mask: radial-gradient(105% 150% at 0% 100%, rgb(0 0 0 / 0.5) 7.66%, rgb(0 0 0 / 0.84) 59.9%, rgb(0 0 0 / 0.97) 99.99%, #000 100%) add;
+  mask: radial-gradient(105% 150% at 0% 100%, rgb(0 0 0 / 0.5) 7.66%, rgb(0 0 0 / 0.84) 59.9%, rgb(0 0 0 / 0.97) 99.99%, #000 100%) add;
+  animation: dots-in 0.3s ease-out;
+}
+
+@keyframes dots-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-surface,
+  .package-card-dots {
+    transition: none;
+  }
 }
 
 .bird-burst-layer {
