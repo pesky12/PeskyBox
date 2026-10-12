@@ -13,7 +13,7 @@
 
 ## Add to VCC
 
-```
+```text
 https://pesky12.github.io/PeskyBox/index.json
 ```
 
